@@ -18,7 +18,7 @@ def set_conf(values: dict) -> ConnectionConfig:
         MAIL_STARTTLS=True,
         MAIL_SSL_TLS=False,
         USE_CREDENTIALS=True,
-        VALIDATE_CERTS=True
+        VALIDATE_CERTS=True,
     )
 
 
@@ -40,8 +40,9 @@ async def ping():
 async def test(values: EmailCreate):
     values = dict(values)
     if not is_valid_token(values.get("token")):
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
-                            content={"error": "wrong token"})
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"error": "wrong token"}
+        )
     return values
 
 
@@ -49,21 +50,25 @@ async def test(values: EmailCreate):
 async def send_mail(values: EmailCreate) -> JSONResponse:
     values = dict(values)
     if not is_valid_token(values.get("token")):
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
-                            content={"error": "wrong token"})
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"error": "wrong token"}
+        )
 
     message = MessageSchema(
         subject=values.get("subject"),
         recipients=[values.get("emai_to")],
         body=values.get("body"),
-        subtype=MessageType.html)
+        subtype=MessageType.html,
+    )
     fm = FastMail(set_conf(values))
     try:
         response = await fm.send_message(message)
     except Exception as err:
-        return JSONResponse(status_code=status.HTTP_409_CONFLICT,
-                            content={"error": err})
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT, content={"error": err}
+        )
 
-    return JSONResponse(status_code=status.HTTP_200_OK,
-                        content={"message": "email has been sent",
-                                 "response": response})
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "email has been sent", "response": response},
+    )
